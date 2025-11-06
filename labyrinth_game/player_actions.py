@@ -1,5 +1,7 @@
 from labyrinth_game.constants import ROOMS
-from labyrinth_game.utils import describe_current_room
+from labyrinth_game.utils import describe_current_room, \
+                                 solve_puzzle, \
+                                 attempt_open_treasure
 
 
 def show_inventory(game_state):
@@ -34,26 +36,14 @@ def take_item(game_state, item_name):
     room_items = ROOMS[game_state['current_room']]['items']
 
     if item_name in room_items:
-        game_state['player_inventory'].append(item_name)
-        room_items.remove(item_name)
-        print(f'Вы подняли: {item_name}')
+        if item_name == 'treasure_chest':
+            print('Вы не можете поднять сундук, он слишком тяжелый.')
+        else:
+            game_state['player_inventory'].append(item_name)
+            room_items.remove(item_name)
+            print(f'Вы подняли: {item_name}')
     else:
         print('Такого предмета здесь нет.')
-
-
-def process_command(game_state, command):
-    command_args = command.strip().lower().split()
-    match command_args:
-        case ['look']:
-            describe_current_room(game_state)
-        case ['go', direction]:
-            move_player(game_state, direction)
-        case ['take', item]:
-            take_item(game_state, item)
-        case ['inventory']:
-            show_inventory(game_state)
-        case _:
-            raise ValueError('Команда не найдена.')
         
 
 def use_item(game_state, item_name):
