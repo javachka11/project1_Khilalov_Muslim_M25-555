@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from labyrinth_game.utils import describe_current_room
+from labyrinth_game.player_actions import process_command, get_input
 
 def main():
     # print("Первая попытка запустить проект!")
@@ -16,7 +17,10 @@ def main():
     describe_current_room(game_state)
 
     while True:
-        break
+        command = get_input()
+        if command in ['exit', 'quit']:
+            return
+        process_command(game_state, command)
 
 
 
