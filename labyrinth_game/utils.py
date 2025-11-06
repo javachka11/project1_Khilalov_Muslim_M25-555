@@ -36,12 +36,12 @@ def solve_puzzle(game_state):
     if cur_room['puzzle'] is None:
         print('Загадок здесь нет.')
     else:
-        print(f'Загадка. {cur_room['puzzle'][0]}')
+        print(f'Загадка. {cur_room["puzzle"][0]}')
         puzzle_answer = input('Ваш ответ: ')
         if puzzle_answer == cur_room['puzzle'][1]:
             print('Ответ правильный.')
             cur_room['puzzle'] = None
-            award = get_award(cur_room)
+            award = get_award(game_state['current_room'])
             if award is not None:
                 game_state['player_inventory'].append(award)
         else:
@@ -66,3 +66,15 @@ def attempt_open_treasure(game_state):
     if game_state['game_over']:
         cur_room['items'].remove('treasure_chest')
         print('В сундуке сокровище! Вы победили!')
+
+# labyrinth_game/utils.py
+def show_help():
+    print("\nДоступные команды:")
+    print("  go <direction>  - перейти в направлении (north/south/east/west)")
+    print("  look            - осмотреть текущую комнату")
+    print("  take <item>     - поднять предмет")
+    print("  use <item>      - использовать предмет из инвентаря")
+    print("  inventory       - показать инвентарь")
+    print("  solve           - попытаться решить загадку в комнате")
+    print("  quit            - выйти из игры")
+    print("  help            - показать это сообщение")

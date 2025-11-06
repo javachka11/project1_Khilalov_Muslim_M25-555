@@ -2,7 +2,8 @@
 
 from labyrinth_game.utils import describe_current_room, \
                                  solve_puzzle, \
-                                 attempt_open_treasure
+                                 attempt_open_treasure, \
+                                 show_help
 from labyrinth_game.player_actions import get_input, \
                                           move_player, \
                                           take_item, \
@@ -27,6 +28,8 @@ def process_command(game_state, command):
             attempt_open_treasure(game_state)
         case ['solve']:
             solve_puzzle(game_state)
+        case ['help']:
+            show_help()
         case _:
             raise ValueError('Команда не найдена.')
 
@@ -39,13 +42,14 @@ def main():
         'steps_taken': 0 # Количество шагов
     }
 
-    print('Добро пожаловать в Лабиринт сокровищ!')
+    print('Добро пожаловать в Лабиринт сокровищ!\n')
 
     describe_current_room(game_state)
-
-    while True:
+    
+    while not game_state['game_over']:
+        print('')
         command = get_input()
-        if command in ['exit', 'quit'] or game_state['game_over']:
+        if command in ['exit', 'quit']:
             return
         try:
             process_command(game_state, command)
