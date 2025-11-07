@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 
-from labyrinth_game.utils import describe_current_room, \
-                                 solve_puzzle, \
-                                 attempt_open_treasure, \
-                                 show_help, \
-                                 quit_game
-from labyrinth_game.player_actions import get_input, \
-                                          move_player, \
-                                          take_item, \
-                                          use_item, \
-                                          show_inventory
-                                          
+from labyrinth_game.player_actions import (
+    get_input,
+    move_player,
+    show_inventory,
+    take_item,
+    use_item,
+)
+from labyrinth_game.utils import (
+    attempt_open_treasure,
+    describe_current_room,
+    quit_game,
+    show_help,
+    solve_puzzle,
+)
+
 
 def process_command(game_state, command):
     command_args = command.strip().lower().split()
@@ -19,6 +23,14 @@ def process_command(game_state, command):
             describe_current_room(game_state)
         case ['go', direction]:
             move_player(game_state, direction)
+        case ['north']:
+            move_player(game_state, 'north')
+        case ['east']:
+            move_player(game_state, 'east')
+        case ['south']:
+            move_player(game_state, 'south')
+        case ['west']:
+            move_player(game_state, 'west')
         case ['take', item]:
             take_item(game_state, item)
         case ['use', item]:
@@ -35,6 +47,7 @@ def process_command(game_state, command):
             quit_game(game_state)
         case _:
             print('Команда не найдена.')
+
 
 def main():
     # print("Первая попытка запустить проект!")
