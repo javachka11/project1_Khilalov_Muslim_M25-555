@@ -1,4 +1,5 @@
 from labyrinth_game.constants import ROOMS
+import math
 
 def describe_current_room(game_state):
     cur_room = ROOMS[game_state['current_room']]
@@ -67,7 +68,60 @@ def attempt_open_treasure(game_state):
         cur_room['items'].remove('treasure_chest')
         print('В сундуке сокровище! Вы победили!')
 
-# labyrinth_game/utils.py
+
+def pseudo_random(seed, modulo):
+    a = 12.9898
+    b = 43758.5453
+
+    num = math.sin(seed * a) * b
+    num = num - math.floor(num)
+    num = num * modulo
+    num = math.floor(num)
+
+    return num
+
+
+def trigger_trap(game_state):
+    print('Ловушка активирована! Пол стал дрожать...')
+
+    inventory = game_state['player_inventory']
+    if inventory:
+        damage = pseudo_random(game_state['steps_taken'], 10)
+        if damage < 3:
+            print('Поражение. Вы не уцелели.')
+            game_state['game_over'] = True
+        else:
+            print('Вы уцелели.')
+    else:
+        lost_item_ind = pseudo_random(game_state['steps_taken'],
+                                      len(inventory))
+        lost_item = inventory.pop(lost_item_ind)
+        print(f'Вы потеряли предмет {lost_item}')
+
+
+def random_event(game_state):
+    not_event = pseudo_random(game_state['steps_taken'], 6)
+    if not not_event:
+        event = pseudo_random(game_state['steps_taken'], 3)
+        if event == 0:
+            print('Вы увидели на полу монетку.')
+            ROOMS[game_state['current_room']]['items'].append('coin')
+        elif event == 1:
+            print('Вы слышите шорох.')
+            if 'sword' in game_state['player_inventory']:
+                print('Вы отпугнули существо.')
+        else:
+            if (game_state['current_room'] == 'trap_room' and
+                'torch' not in game_state['player_inventory']):
+                print('Опасность!')
+                trigger_trap(game_state)
+
+
+
+
+
+
+
 def show_help():
     print("\nДоступные команды:")
     print("  go <direction>  - перейти в направлении (north/south/east/west)")
@@ -78,3 +132,9 @@ def show_help():
     print("  solve           - попытаться решить загадку в комнате")
     print("  quit            - выйти из игры")
     print("  help            - показать это сообщение")
+
+
+def quit_game(game_state):
+    game_state['game_over'] = True
+    print('Выход из игры.')
+

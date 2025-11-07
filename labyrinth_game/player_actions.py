@@ -1,8 +1,8 @@
 from labyrinth_game.constants import ROOMS
 from labyrinth_game.utils import describe_current_room, \
                                  solve_puzzle, \
-                                 attempt_open_treasure
-
+                                 attempt_open_treasure, \
+                                 random_event
 
 def show_inventory(game_state):
     items = game_state['player_inventory']
@@ -16,7 +16,6 @@ def get_input(prompt="> "):
     try:
         return input(prompt).strip().lower()
     except (KeyboardInterrupt, EOFError):
-        print("\nВыход из игры.")
         return "quit"
 
 
@@ -28,6 +27,7 @@ def move_player(game_state, direction):
         game_state['current_room'] = next_room
         game_state['steps_taken'] += 1
         print(f'Описание комнаты: {ROOMS[next_room]["description"]}')
+        random_event(game_state)
     else:
         print('Нельзя пойти в этом направлении.')
 
