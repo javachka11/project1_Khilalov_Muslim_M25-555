@@ -1,9 +1,22 @@
 import math
 
-from labyrinth_game.constants import COMMANDS, ROOMS
+from labyrinth_game.constants import (
+    COMMANDS,
+    CRITICAL_HEALTH,
+    EVENTS,
+    INDENT_INFO,
+    PROBABILITIES,
+    ROOMS,
+)
 
 
 def describe_current_room(game_state):
+    """
+        Показать полное описание комнаты.
+
+        game_state - состояние игры на текущий момент.
+    """
+
     cur_room = ROOMS[game_state['current_room']]
 
     print(f'== {game_state["current_room"].upper()} ==')
@@ -15,57 +28,46 @@ def describe_current_room(game_state):
 
 
 def solve_puzzle(game_state):
-    ALL_ANSWERS = {'hall': ['10', 'десять', 'ten'],
-                   'trap_room': ['шаг шаг шаг', 'шагшагшаг',
-                                 'шагшаг шаг', 'шагшаг шаг'],
-                    'library': ['резонанс', 'resonance'],
-                    'treasure_room': ['10', 'десять', 'ten'],
-                    'skeleton_room': ['01:40', '1:40',
-                                      '01 40', '0140',
-                                      '1 40', '140',
-                                      '01:40:00', '1:40:00',
-                                      '1 hour 40 minutes',
-                                      'one hour fourty minutes',
-                                      '1 час 40 минут',
-                                      'один час сорок минут',
-                                      'час сорок',
-                                      'час сорок минут',
-                                      'без 20 2',
-                                      'без двадцати два']}
+    """
+        Попытаться решить загадку, если она присутствует в комнате.
+        За правильное решение загадки игрок получает награду.
+        Исключением является загадка в комнате с ловушкой.
+        За её правильное решение игрок не получит приз,
+        но если он ошибётся, то активирует ловушку.
 
-    AWARDS = {'hall': {'message': 'Сундукт открылся и вы получаете rusty_key.',
-                       'prize': 'rusty_key'},
-              'library': {'message': 'Свиток указывает вам на ключ от сокровищницы.',
-                          'prize': 'treasure_key'},
-              'treasure_room': {'message': 'Код открывает сундук.',
-                                'prize': 'treasure'},
-              'skeleton_room': {'message': 'Скелет рассыпается и ' \
-                                'роняет ключ от сокровищницы.',
-                                'prize': 'treasure_key'}}
-    
-    RIDDLE = 0
+        game_state - состояние игры на текущий момент.
+    """
 
     cur_room = ROOMS[game_state['current_room']]
+
     if cur_room['puzzle'] is None:
         print('Загадок здесь нет.')
     else:
-        print(f'Загадка. {cur_room["puzzle"][RIDDLE]}')
+        print(f'Загадка: {cur_room["puzzle"]["riddle"]}')
         puzzle_answer = ' '.join(input('Ваш ответ: ').strip().lower().split())
-        true_answers = ALL_ANSWERS[game_state['current_room']]
+        true_answers = cur_room['puzzle']['answer']
         if puzzle_answer in true_answers:
             print('Ответ правильный.')
-            cur_room['puzzle'] = None
-            award = AWARDS.get(game_state['current_room'])
+            award = cur_room['puzzle'].get('award')            
+            # if-clause здесь соответствует комнате с ловушкой
             if award is not None:
                 print(award['message'])
                 game_state['player_inventory'].append(award['prize'])
+            cur_room['puzzle'] = None
         else:
-            print('Неверно. Попробуйте снова.')
             if game_state['current_room'] == 'trap_room':
                 trigger_trap(game_state)
+            else:
+                print('Неверно. Попробуйте снова.')
 
 
 def attempt_open_treasure(game_state):
+    """
+        Попытаться открыть сундук с сокровищем.
+
+        game_state - состояние игры на текущий момент.
+    """
+
     cur_room = ROOMS[game_state['current_room']]
 
     if 'treasure_key' not in game_state['player_inventory']:
@@ -86,6 +88,13 @@ def attempt_open_treasure(game_state):
 
 
 def pseudo_random(seed, modulo):
+    """
+        Сгенерировать псевдослучайное целое число в интервале [0, modulo).
+
+        seed - сид генерации;
+        modulo - натуральное число, верхняя граница генерации.
+    """
+
     a = 12.9898
     b = 43758.5453
 
@@ -98,40 +107,47 @@ def pseudo_random(seed, modulo):
 
 
 def trigger_trap(game_state):
-    DAMAGE_PROBABILITY = 10
-    CRITICAL_HEALTH = 3
+    """
+        Активировать ловушку.
+
+        game_state - состояние игры на текущий момент.
+    """
 
     print('Ловушка активирована! Пол стал дрожать...')
 
     inventory = game_state['player_inventory']
     if inventory:
+        lost_item_ind = pseudo_random(game_state['steps_taken'],
+                                      len(inventory))
+        lost_item = inventory.pop(lost_item_ind)
+        print(f'Вы потеряли предмет {lost_item}')
+    else:
         health = pseudo_random(game_state['steps_taken'],
-                               DAMAGE_PROBABILITY)
+                               PROBABILITIES['damage'])
         if health < CRITICAL_HEALTH:
             print('Поражение. Вы не уцелели.')
             game_state['game_over'] = True
         else:
             print('Вы уцелели.')
-    else:
-        lost_item_ind = pseudo_random(game_state['steps_taken'],
-                                      len(inventory))
-        lost_item = inventory.pop(lost_item_ind)
-        print(f'Вы потеряли предмет {lost_item}')
 
 
 def random_event(game_state):
-    EVENT_PROBABILITY = 10
-    NUM_EVENTS = 3
-    FIND_COIN = 0
-    MEET_MONSTER = 1
+    """
+        Сгенерировать случайное событие в комнате.
+        Наиболее вероятно, что никакого события не произойдёт.
 
-    not_event = pseudo_random(game_state['steps_taken'], EVENT_PROBABILITY)
+        game_state - состояние игры на текущий момент.
+    """
+
+    not_event = pseudo_random(game_state['steps_taken'],
+                              PROBABILITIES['event'])
     if not not_event:
-        event = pseudo_random(game_state['steps_taken'], NUM_EVENTS)
-        if event == FIND_COIN:
+        event = pseudo_random(game_state['steps_taken'],
+                              len(EVENTS))
+        if event == EVENTS['find_coin']:
             print('Вы увидели на полу монетку.')
             ROOMS[game_state['current_room']]['items'].append('coin')
-        elif event == MEET_MONSTER:
+        elif event == EVENTS['meet_monster']:
             print('Вы слышите шорох.')
             if 'sword' in game_state['player_inventory']:
                 print('Вы отпугнули существо.')
@@ -143,15 +159,22 @@ def random_event(game_state):
 
 
 def show_help():
-    INDENT = 16
-
+    """
+        Показать панель помощи игроку.
+    """
+    
     s = 'Доступные команды:\n'
     for command, description in COMMANDS.items():
-        s += f'{command:{INDENT}} - {description}\n'
+        s += f'{command:{INDENT_INFO}} - {description}\n'
     print(s)
 
 
 def quit_game(game_state):
+    """
+        Завершить игру досрочно.
+
+        game_state - состояние игры на текущий момент.
+    """
+
     game_state['game_over'] = True
     print('Выход из игры.')
-

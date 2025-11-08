@@ -5,21 +5,42 @@ from labyrinth_game.utils import (
 
 
 def show_inventory(game_state):
+    """
+        Показать инвентарь игрока.
+
+        game_state - состояние игры на текущий момент.
+    """
+
     items = game_state['player_inventory']
     if items:
         print(f'Инвентарь: {items}')
     else:
-        print('Инвентарь пуст')
+        print('Инвентарь пуст.')
+
 
 
 def get_input(prompt="> "):
+    """
+        Получить команду от игрока.
+
+        prompt - окно приглашения для ввода.
+    """
+
     try:
         return input(prompt).strip().lower()
     except (KeyboardInterrupt, EOFError):
         return "quit"
 
 
+
 def move_player(game_state, direction):
+    """
+        Переместиться в заданном направлении.
+
+        game_state - состояние игры на текущий момент;
+        direction - направление (north/east/south/west) перехода.
+    """
+
     exits = ROOMS[game_state['current_room']]['exits']
 
     next_room = exits.get(direction)
@@ -40,7 +61,16 @@ def move_player(game_state, direction):
         print('Нельзя пойти в этом направлении.')
 
 
+
 def take_item(game_state, item_name):
+    """
+        Попытаться подобрать предмет.
+        В случае успеха он переместится в инвентарь игрока.
+
+        game_state - состояние игры на текущий момент;
+        item_name - название предмета.
+    """
+
     room_items = ROOMS[game_state['current_room']]['items']
 
     if item_name in room_items:
@@ -55,6 +85,13 @@ def take_item(game_state, item_name):
         
 
 def use_item(game_state, item_name):
+    """
+        Попытаться использовать предмет.
+
+        game_state - состояние игры на текущий момент;
+        item_name - название предмета.
+    """
+
     player_items = game_state['player_inventory']
     
     if item_name in player_items:

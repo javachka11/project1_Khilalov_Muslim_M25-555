@@ -17,6 +17,13 @@ from labyrinth_game.utils import (
 
 
 def process_command(game_state, command):
+    """
+        Обработать команду в соответствии с логикой игры.
+
+        game_state - состояние игры на текущий момент;
+        command - команда интерфейса (для информации - help).
+    """
+
     command_args = command.strip().lower().split()
     match command_args:
         case ['look']:
@@ -50,6 +57,10 @@ def process_command(game_state, command):
 
 
 def main():
+    """
+        Основная функция игры.
+    """
+
     # print("Первая попытка запустить проект!")
     game_state = {
         'player_inventory': [], # Инвентарь игрока
