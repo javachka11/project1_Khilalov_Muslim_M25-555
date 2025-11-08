@@ -36,3 +36,6 @@
 ## Запись геймплея (asciinema)
 
 [![asciicast](https://asciinema.org/a/8R9t1eO95gJHBjQYHcgro08UM.svg)](https://asciinema.org/a/8R9t1eO95gJHBjQYHcgro08UM)
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
